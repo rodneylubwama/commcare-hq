@@ -1,7 +1,7 @@
 from corehq import toggles
 from corehq.apps.app_manager.dbaccessors import get_case_types_from_apps
-from corehq.apps.app_manager.util import all_case_properties_by_domain
-from corehq.apps.data_dictionary.models import CaseProperty, CaseType
+from corehq.apps.app_manager.util import all_case_properties_by_domain, ParentCasePropertyBuilder
+from corehq.apps.data_dictionary.models import CaseProperty, CaseType, CaseRelationship
 from corehq.apps.export.models.new import CaseExportDataSchema
 
 
@@ -88,3 +88,19 @@ def _create_properties_for_case_types(domain, case_type_to_prop):
                 ))
 
     CaseProperty.objects.bulk_create(new_case_properties)
+
+
+def generate_case_hierarchy(app, case_types):
+    builder = ParentCasePropertyBuilder(app)
+    parent_type_map = builder.get_parent_type_map(case_types, allow_multiple_parents=True)
+    for case_type, relationships in parent_type_map:
+        case_type = CaseType.objects.get(domain=app.domain, name=case_type)
+        for relationship, parent_types in relationships:
+            for parent in parent_types:
+                referenced_case_type = CaseType.objects.get_or_create(domain=app.domain, name=parent)
+
+                CaseRelationship(
+                    case_type=case_type,
+                    referenced_case_type=referenced_case_type
+                    reference_id=relationship
+                ).save()

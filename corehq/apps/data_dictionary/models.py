@@ -39,3 +39,18 @@ class CaseProperty(models.Model):
 
     class Meta:
         unique_together = ('case_type', 'name')
+
+
+class CaseRelationship(models.Model):
+    case_type = models.ForeignKey(
+        CaseType,
+        on_delete=models.CASCADE,
+    )
+    referenced_case_type = models.ForeignKey(
+        CaseType,
+        on_delete=models.CASCADE,
+    )
+    reference_id = models.CharField(max_length=126, blank=False)
+
+    class Meta:
+        unique_together = (case_type, referenced_case_type, reference_id)
