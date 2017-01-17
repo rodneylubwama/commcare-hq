@@ -171,6 +171,35 @@ class TestFormWorkflow(SimpleTestCase, TestXmlMixin):
 
         self.assertXmlPartialEqual(self.get_xml('form_link_enikshay'), factory.app.create_suite(), "./entry")
 
+    def test_form_link_same_variable_in_current_session(self):
+        # http://manage.dimagi.com/default.asp?245859
+        #
+        # In the case where the same session variable appears in the current session
+        # and in the session being created for form linking how do we decide
+        # which one to use?
+        #
+        factory = AppFactory(build_version='2.9.0/latest')
+        m0, m0f0 = factory.new_basic_module('person registration', 'person')
+        factory.form_opens_case(m0f0)
+
+        m1, m1f0 = factory.new_advanced_module('episode registration', 'episode')
+        factory.form_requires_case(m1f0, 'episode')
+        factory.advanced_form_autoloads(m1f0, AUTO_SELECT_CASE, 'host', 'load_episode_0')
+        factory.form_opens_case(m1f0, 'episode', is_subcase=True, parent_tag='auto_select_case', is_extension=True)
+
+        m2, m2f0 = factory.new_advanced_module('tests', 'episode')
+        factory.form_requires_case(m2f0, 'episode')
+        factory.advanced_form_autoloads(m2f0, AUTO_SELECT_CASE, 'host', 'load_episode_0')
+
+        m1f0.post_form_workflow = WORKFLOW_FORM
+        m1f0.form_links = [
+            FormLink(xpath="true()", form_id=m2f0.unique_id, datums=[
+                FormDatum(name='case_id_load_episode_0', xpath="instance('commcaresession')/session/data/case_id_new_episode_0")
+            ]),
+        ]
+        print factory.app.create_suite()
+        # self.assertXmlPartialEqual(self.get_xml('form_link_enikshay'), factory.app.create_suite(), "./entry")
+
     def test_return_to_parent_module(self):
         factory = AppFactory(build_version='2.9.0/latest')
         m0, m0f0 = factory.new_basic_module('enroll child', 'child')
