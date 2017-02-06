@@ -51,6 +51,15 @@ def workflow_transform(workflow, doc):
     return ', '.join(types)
 
 
+def doc_type_transform(doc_type, doc):
+    doc_types = {
+        "CommCareUser": "Mobile Worker",
+        "WebUser": "Web User",
+        "CommCareCase": "Case",
+    }
+    return doc_types.get(doc_type, "Unknown")
+
+
 NULL_CACHE_VALUE = "___NULL_CACHE_VAL___"
 
 

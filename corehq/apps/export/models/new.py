@@ -57,7 +57,8 @@ from corehq.apps.export.const import (
     CASE_EXPORT,
     SMS_EXPORT,
     TRANSFORM_FUNCTIONS,
-    USERNAME_TRANSFORM,
+    DOC_TYPE_TRANSFORM,
+    OWNER_ID_TRANSFORM,
     WORKFLOW_TRANSFORM,
     DEID_TRANSFORM_FUNCTIONS,
     PROPERTY_TAG_CASE,
@@ -947,7 +948,8 @@ class SMSExportInstance(ExportInstance):
                         ExportColumn(
                             label="Contact Type",
                             item=ExportItem(
-                                path=[PathNode(name='couch_recipient_doc_type')]
+                                path=[PathNode(name='couch_recipient_doc_type')],
+                                transform=DOC_TYPE_TRANSFORM,
                             ),
                             selected=True,
                         ),
@@ -966,10 +968,10 @@ class SMSExportInstance(ExportInstance):
                             selected=True,
                         ),
                         ExportColumn(
-                            label="Username",
+                            label="Owner Name",
                             item=ExportItem(
                                 path=[PathNode(name='couch_recipient')],
-                                transform=USERNAME_TRANSFORM,
+                                transform=OWNER_ID_TRANSFORM,
                             ),
                             selected=True,
                         ),

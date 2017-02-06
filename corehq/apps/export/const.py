@@ -11,6 +11,7 @@ from corehq.apps.export.transforms import (
     user_id_to_username,
     owner_id_to_display,
     workflow_transform,
+    doc_type_transform,
 )
 
 # When fixing a bug that requires existing schemas to be rebuilt,
@@ -29,11 +30,13 @@ CASE_NAME_TRANSFORM = "case_name_transform"
 USERNAME_TRANSFORM = "username_transform"
 OWNER_ID_TRANSFORM = "owner_id_transform"
 WORKFLOW_TRANSFORM = "workflow_transform"
+DOC_TYPE_TRANSFORM = "doc_type_transform"
 TRANSFORM_FUNCTIONS = {
     CASE_NAME_TRANSFORM: case_id_to_case_name,
     USERNAME_TRANSFORM: user_id_to_username,
     OWNER_ID_TRANSFORM: owner_id_to_display,
     WORKFLOW_TRANSFORM: workflow_transform,
+    DOC_TYPE_TRANSFORM: doc_type_transform,
 }
 PLAIN_USER_DEFINED_SPLIT_TYPE = 'plain'
 MULTISELCT_USER_DEFINED_SPLIT_TYPE = 'multi-select'
