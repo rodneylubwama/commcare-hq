@@ -771,6 +771,9 @@ class ExportInstance(BlobMixin, Document):
             elif table.path == PARENT_CASE_TABLE:
                 cls.__insert_system_properties(table, PARENT_CASE_TABLE_PROPERTIES,
                         **column_initialization_data)
+        elif export_type == SMS_EXPORT:
+            if table.path == MAIN_TABLE:
+                cls.__insert_system_properties(table, [ROW_NUMBER_COLUMN], **column_initialization_data)
 
     @classmethod
     def __insert_system_properties(cls, table, properties, top=True, **column_initialization_data):
@@ -935,13 +938,19 @@ class SMSExportInstance(ExportInstance):
 
     @classmethod
     def _new_from_schema(cls, schema):
-        return cls(
+        instance = cls(
             domain=schema.domain,
             tables=[
                 TableConfiguration(
                     label="Messages",
                     columns=[
-                        RowNumberColumn(),
+                        ExportColumn(
+                            label="Contact Type",
+                            item=ExportItem(
+                                path=[PathNode(name='couch_recipient_doc_type')]
+                            ),
+                            selected=True,
+                        ),
                         ExportColumn(
                             label="Contact ID",
                             item=ExportItem(
@@ -994,10 +1003,13 @@ class SMSExportInstance(ExportInstance):
                             selected=True,
                         ),
                     ],
-                    selected=True
+                    path=MAIN_TABLE,
+                    selected=True,
                 )
             ],
         )
+        cls._insert_system_properties(instance.domain, schema.type, instance.tables[0])
+        return instance
 
 
 class ExportInstanceDefaults(object):
