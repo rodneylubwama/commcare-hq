@@ -1877,7 +1877,7 @@ class SMSExportDataSchema(ExportDataSchema):
         return SMS_DATA_SCHEMA_VERSION
 
     @staticmethod
-    def get_latest_export_schema(domain, app_id, case_type):
+    def get_latest_export_schema(domain, app_id, identifier):
         return SMSExportDataSchema(domain=domain)
 
 
