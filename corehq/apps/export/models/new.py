@@ -613,10 +613,10 @@ class ExportInstance(BlobMixin, Document):
     def defaults(self):
         if self.type == FORM_EXPORT:
             return FormExportInstanceDefaults
-        elif self.type == CASE_EXPORT:
-            return CaseExportInstanceDefaults
-        else:
+        elif self.type == SMS_EXPORT:
             return SMSExportInstanceDefaults
+        else:
+            return CaseExportInstanceDefaults
 
     def get_filters(self):
         """
