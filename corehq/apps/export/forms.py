@@ -1229,7 +1229,7 @@ class FilterCaseESExportDownloadForm(EmwfFilterExportMixin, GenericFilterCaseExp
         ]
 
 
-class FilterSmsESExportDownloadForm(EmwfFilterExportMixin, BaseFilterExportDownloadForm):
+class FilterSmsESExportDownloadForm(BaseFilterExportDownloadForm):
     date_range = DateSpanField(
         label=ugettext_lazy("Date Range"),
         required=True,
