@@ -962,7 +962,7 @@ class DownloadCaseExportView(BaseDownloadExportView):
 
 class DownloadSmsExportView(BaseDownloadExportView):
     urlname = 'export_download_sms'
-    page_title = ugettext_noop("Download SMS Export")
+    page_title = ugettext_noop("Export SMS")
     form_or_case = 'case'
     filter_form_class = None
 
