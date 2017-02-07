@@ -61,8 +61,10 @@ from corehq.apps.export.forms import (
 from corehq.apps.export.models import (
     FormExportDataSchema,
     CaseExportDataSchema,
+    SMSExportDataSchema,
     FormExportInstance,
     CaseExportInstance,
+    SMSExportInstance,
     ExportInstance,
 )
 from corehq.apps.export.const import (
@@ -602,7 +604,7 @@ class BaseDownloadExportView(ExportsPermissionsMixin, JSONResponseMixin, BasePro
         ):
             raw_export_list = json.loads(self.request.POST['export_list'])
             exports = [self._get_export(self.domain, e['id']) for e in raw_export_list]
-        elif self.export_id:
+        elif self.export_id or self.export_id == '':
             exports = [self._get_export(self.domain, self.export_id)]
 
         if not self.has_view_permissions:
@@ -943,6 +945,51 @@ class DownloadCaseExportView(BaseDownloadExportView):
             'title': CaseExportListView.page_title,
             'url': reverse(CaseExportListView.urlname, args=(self.domain,)),
         }]
+
+    def get_filters(self, filter_form_data):
+        filter_form = self._get_filter_form(filter_form_data)
+        return filter_form.get_case_filter()
+
+    def _get_filter_form(self, filter_form_data):
+        filter_form = self.filter_form_class(
+            self.domain_object, self.timezone, filter_form_data,
+        )
+        if not filter_form.is_valid():
+            raise ExportFormValidationException()
+        return filter_form
+
+
+class DownloadSmsExportView(BaseDownloadExportView):
+    urlname = 'export_download_sms'
+    page_title = ugettext_noop("Download SMS Export")
+    form_or_case = 'case'
+    filter_form_class = FilterCaseCouchExportDownloadForm
+
+    @staticmethod
+    def get_export_schema(domain):
+        doc = SMSExportDataSchema(domain=domain)
+        if doc.index[0] == domain:
+            return doc
+        raise Http404(_("Export not found"))
+
+    @property
+    def export_list_url(self):
+        return None
+
+    @property
+    @memoized
+    def download_export_form(self):
+        return self.filter_form_class(
+            self.domain_object,
+            timezone=self.timezone,
+            initial={
+                'type_or_group': 'type',
+            },
+        )
+
+    @property
+    def parent_pages(self):
+        return []
 
     def get_filters(self, filter_form_data):
         filter_form = self._get_filter_form(filter_form_data)
@@ -2267,6 +2314,30 @@ class DownloadNewCaseExportView(GenericDownloadNewExportMixin, DownloadCaseExpor
 
     def _get_export(self, domain, export_id):
         return CaseExportInstance.get(export_id)
+
+    def get_filters(self, filter_form_data, mobile_user_and_group_slugs):
+        filter_form = self._get_filter_form(filter_form_data)
+        if not self.request.can_access_all_locations:
+            accessible_location_ids = (SQLLocation.active_objects.accessible_location_ids(
+                self.request.domain,
+                self.request.couch_user)
+            )
+        else:
+            accessible_location_ids = None
+        form_filters = filter_form.get_case_filter(
+            mobile_user_and_group_slugs, self.request.can_access_all_locations, accessible_location_ids
+        )
+        return form_filters
+
+
+class DownloadNewSmsExportView(GenericDownloadNewExportMixin, DownloadSmsExportView):
+    urlname = 'new_export_download_sms'
+    filter_form_class = FilterCaseESExportDownloadForm
+    export_filter_class = CaseListFilter
+    export_id = ''
+
+    def _get_export(self, domain, export_id):
+        return SMSExportInstance._new_from_schema(SMSExportDataSchema.get_latest_export_schema(domain, None, None))
 
     def get_filters(self, filter_form_data, mobile_user_and_group_slugs):
         filter_form = self._get_filter_form(filter_form_data)
