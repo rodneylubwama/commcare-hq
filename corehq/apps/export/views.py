@@ -55,6 +55,7 @@ from corehq.apps.export.forms import (
     FilterCaseCouchExportDownloadForm,
     EmwfFilterFormExport,
     FilterCaseESExportDownloadForm,
+    FilterSmsESExportDownloadForm,
     CreateExportTagForm,
     DashboardFeedFilterForm,
 )
@@ -963,7 +964,7 @@ class DownloadSmsExportView(BaseDownloadExportView):
     urlname = 'export_download_sms'
     page_title = ugettext_noop("Download SMS Export")
     form_or_case = 'case'
-    filter_form_class = FilterCaseCouchExportDownloadForm
+    filter_form_class = None
 
     @staticmethod
     def get_export_schema(domain):
@@ -2332,8 +2333,8 @@ class DownloadNewCaseExportView(GenericDownloadNewExportMixin, DownloadCaseExpor
 
 class DownloadNewSmsExportView(GenericDownloadNewExportMixin, DownloadSmsExportView):
     urlname = 'new_export_download_sms'
-    filter_form_class = FilterCaseESExportDownloadForm
-    export_filter_class = CaseListFilter
+    filter_form_class = FilterSmsESExportDownloadForm
+    export_filter_class = None
     export_id = ''
 
     def _get_export(self, domain, export_id):
@@ -2341,17 +2342,7 @@ class DownloadNewSmsExportView(GenericDownloadNewExportMixin, DownloadSmsExportV
 
     def get_filters(self, filter_form_data, mobile_user_and_group_slugs):
         filter_form = self._get_filter_form(filter_form_data)
-        if not self.request.can_access_all_locations:
-            accessible_location_ids = (SQLLocation.active_objects.accessible_location_ids(
-                self.request.domain,
-                self.request.couch_user)
-            )
-        else:
-            accessible_location_ids = None
-        form_filters = filter_form.get_case_filter(
-            mobile_user_and_group_slugs, self.request.can_access_all_locations, accessible_location_ids
-        )
-        return form_filters
+        return filter_form.get_filter()
 
 
 class GenerateSchemaFromAllBuildsView(View):
