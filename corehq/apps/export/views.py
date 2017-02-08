@@ -605,7 +605,7 @@ class BaseDownloadExportView(ExportsPermissionsMixin, JSONResponseMixin, BasePro
         ):
             raw_export_list = json.loads(self.request.POST['export_list'])
             exports = [self._get_export(self.domain, e['id']) for e in raw_export_list]
-        elif self.export_id or self.export_id == '':
+        elif self.export_id or self.sms_export:
             exports = [self._get_export(self.domain, self.export_id)]
 
         if not self.has_view_permissions:
@@ -2289,9 +2289,10 @@ class DownloadNewCaseExportView(GenericDownloadNewExportMixin, DownloadCaseExpor
 class DownloadNewSmsExportView(GenericDownloadNewExportMixin, BaseDownloadExportView):
     urlname = 'new_export_download_sms'
     page_title = ugettext_noop("Export SMS")
-    form_or_case = 'case'
+    form_or_case = None  # todo: remove this property from exports
     filter_form_class = FilterSmsESExportDownloadForm
-    export_id = ''
+    export_id = None
+    sms_export = True  # todo: remove this property from exports
 
     @staticmethod
     def get_export_schema(domain, include_metadata):
