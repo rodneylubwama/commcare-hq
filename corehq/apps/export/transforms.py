@@ -21,28 +21,11 @@ def case_id_to_case_name(case_id, doc):
 
 
 def workflow_transform(workflow, doc):
-    from corehq.apps.sms.models import (
-        WORKFLOW_BROADCAST,
-        WORKFLOW_CALLBACK,
-        WORKFLOW_DEFAULT,
-        WORKFLOW_FORWARD,
-        WORKFLOW_KEYWORD,
-        WORKFLOW_PERFORMANCE,
-        WORKFLOW_REMINDER,
-    )
+    from corehq.apps.sms.models import WORKFLOWS_FOR_REPORTS
     from corehq.apps.sms.filters import MessageTypeFilter
 
-    relevant_workflows = [
-        WORKFLOW_BROADCAST,
-        WORKFLOW_CALLBACK,
-        WORKFLOW_DEFAULT,
-        WORKFLOW_FORWARD,
-        WORKFLOW_KEYWORD,
-        WORKFLOW_PERFORMANCE,
-        WORKFLOW_REMINDER,
-    ]
     types = []
-    if workflow in relevant_workflows:
+    if workflow in WORKFLOWS_FOR_REPORTS:
         types.append(workflow.lower())
     if doc.get('xforms_session_couch_id', None):
         types.append(MessageTypeFilter.OPTION_SURVEY.lower())
