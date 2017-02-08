@@ -960,48 +960,6 @@ class DownloadCaseExportView(BaseDownloadExportView):
         return filter_form
 
 
-class DownloadSmsExportView(BaseDownloadExportView):
-    urlname = 'export_download_sms'
-    page_title = ugettext_noop("Export SMS")
-    form_or_case = 'case'
-    filter_form_class = None
-
-    @staticmethod
-    def get_export_schema(domain):
-        return SMSExportDataSchema(domain=domain)
-
-    @property
-    def export_list_url(self):
-        return None
-
-    @property
-    @memoized
-    def download_export_form(self):
-        return self.filter_form_class(
-            self.domain_object,
-            timezone=self.timezone,
-            initial={
-                'type_or_group': 'type',
-            },
-        )
-
-    @property
-    def parent_pages(self):
-        return []
-
-    def get_filters(self, filter_form_data):
-        filter_form = self._get_filter_form(filter_form_data)
-        return filter_form.get_case_filter()
-
-    def _get_filter_form(self, filter_form_data):
-        filter_form = self.filter_form_class(
-            self.domain_object, self.timezone, filter_form_data,
-        )
-        if not filter_form.is_valid():
-            raise ExportFormValidationException()
-        return filter_form
-
-
 class BaseExportListView(ExportsPermissionsMixin, JSONResponseMixin, BaseProjectDataView):
     template_name = 'export/export_list.html'
     allow_bulk_export = True
